@@ -1,0 +1,29 @@
+bayangkan kamu adalah seorang web developer dan saya adalah bos kamu, 
+saya mau kamu membuat sebuah website sederhana saja, 
+tema websitenya adalah pemesanan tiket di sekitaran danau toba, 
+yang dimana menu menut utama yang berada di navbar nya nanti itu adalah "home, kontak, hotel, tentang kami". lalu ada sisi admin,
+artinya ada halaman admin
+Bagian "Home":
+- Menampilkan Background view dari danau toba
+- Menampilkan menu searching untuk mencari hotel yang ada di web kita
+- Menampilkan hotel rekomendasi
+
+Bagian "Hotel":
+- gambar hotel
+- Deskripsi keunggulan hotel
+- Harga
+- Tombol pesan sekarang
+
+Bagian kontak:
+- Menampilkan menu layanan feedback
+
+bagian tentang kami:
+- menampilkan informasi seputaran website
+
+dan semua gambaran yang ada di menu hotel itu tidak ketik manual di html melainkan auto update dari admin panel, 
+ya sudah pasti kamu juga harus membuat admin panel, sederhana saja. Dan untuk masuk ke dalam websitenya ada menu login, 
+registrasi dan logout untuk user maupun admin, artinya ketika admin login atau logout dia tidak berada di halaman utama yang sama dengan user, 
+tetapi admin punya halaman website sendiri
+
+tools yang kamu gunakan adalah PHP, MYSQL, HTML, CSS
+sebelum memulai proses koding, coba buatkan hierarki filenya

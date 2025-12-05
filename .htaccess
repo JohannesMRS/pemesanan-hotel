@@ -1,0 +1,19 @@
+RewriteEngine On
+
+# Prevent directory listing
+Options -Indexes
+
+# Protect config directory
+<FilesMatch "^\.ht">
+    Require all denied
+</FilesMatch>
+
+# Redirect to index.php for clean URLs
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
+
+# Prevent access to sensitive files
+<FilesMatch "\.(sql|log|ini)$">
+    Require all denied
+</FilesMatch>
