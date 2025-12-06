@@ -46,7 +46,7 @@ function isAdmin() {
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: ' . getBaseUrl() . 'auth/login.php');
+        header('Location: ' . getBaseUrl() . '../auth/login.php');
         exit();
     }
 }
@@ -55,7 +55,7 @@ function requireLogin() {
 function requireAdmin() {
     requireLogin();
     if (!isAdmin()) {
-        header('Location: ' . getBaseUrl() . 'index.php');
+        header('Location: ' . getBaseUrl() . '../pages/home.php');
         exit();
     }
 }

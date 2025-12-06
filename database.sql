@@ -59,7 +59,7 @@ VALUES ('admin', 'admin@danautoba.com', '$2y$10$YourHashedPasswordHere', 'admin'
 
 -- Insert sample hotels
 INSERT INTO hotels (name, description, location, price_per_night, amenities, image_url, is_recommended) VALUES
-('Hotel Danau Toba Indah', 'Hotel dengan pemandangan langsung ke Danau Toba', 'Parapat, Sumatera Utara', 450000, '["WiFi Gratis", "Kolam Renang", "Restoran", "Parkir Gratis"]', 'hotel1.jpg', 1),
-('Resort Samosir Luxury', 'Resort mewah di pulau Samosir', 'Pulau Samosir', 750000, '["WiFi Gratis", "Spa", "Restoran", "Fitness Center", "Parkir Gratis"]', 'hotel2.jpg', 1),
+('Hotel Danau Toba Indah', 'Hotel dengan pemandangan langsung ke Danau Toba', 'Parapat, Sumatera Utara', 450000, '["WiFi Gratis", "Kolam Renang", "Restoran", "Parkir Gratis"]', 'hotelNiagara.jpg', 1),
+('Resort Samosir Luxury', 'Resort mewah di pulau Samosir', 'Pulau Samosir', 750000, '["WiFi Gratis", "Spa", "Restoran", "Fitness Center", "Parkir Gratis"]', 'samosirVilla.jpg', 1),
 ('Hotel Silimalombu', 'Hotel nyaman dengan harga terjangkau', 'Silimalombu', 250000, '["WiFi Gratis", "Restoran", "Parkir Gratis"]', 'hotel3.jpg', 0),
 ('Toba Village Resort', 'Resort dengan konsep tradisional Batak', 'Balige', 550000, '["WiFi Gratis", "Kolam Renang", "Restoran", "Parkir Gratis", "Tour Guide"]', 'hotel4.jpg', 1);

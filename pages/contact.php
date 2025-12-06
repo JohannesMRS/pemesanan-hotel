@@ -1,5 +1,4 @@
 <?php
-require_once '../config/database.php';
 $page_title = "Kontak";
 require_once '../includes/header.php';
 

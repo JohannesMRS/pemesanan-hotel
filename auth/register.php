@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Danau Toba Ticketing</title>
-    <link rel="stylesheet" href="../assets/css/auth.css">
+    <link rel="stylesheet" href="../assets/style/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
                 </div>
             <?php endif; ?>
             
-            <form action="process_register.php" method="POST" class="auth-form">
+            <form action="proses_login.php" method="POST" class="auth-form">
                 <div class="form-group">
                     <label for="username"><i class="fas fa-user"></i> Username</label>
                     <input type="text" id="username" name="username" required 
@@ -60,7 +60,7 @@
             
             <div class="auth-footer">
                 <p>Sudah punya akun? <a href="login.php">Login disini</a></p>
-                <p><a href="../index.php"><i class="fas fa-home"></i> Kembali ke Home</a></p>
+                <p><a href="../pages/home.php"><i class="fas fa-home"></i> Kembali ke Home</a></p>
             </div>
         </div>
     </div>
