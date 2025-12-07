@@ -77,7 +77,7 @@ $conn = getConnection();
             ?>
                     <div class="hotel-card">
                         <div class="hotel-image">
-                            <img src="img/<?php echo $hotel['image_url'] ?: 'default.jpg'; ?>"
+                            <img src="../img/<?php echo $hotel['image_url'] ?: 'default.jpg'; ?>"
                                 alt="<?php echo htmlspecialchars($hotel['name']); ?>">
                             <div class="hotel-badge">Rekomendasi</div>
                         </div>
