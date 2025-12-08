@@ -1,11 +1,14 @@
 <?php
-require_once '../config/database.php';
+// auth/logout.php
+session_start();
 
-// Hapus semua session
-session_unset();
+// Hapus semua variabel sesi
+$_SESSION = array();
+
+// Hancurkan sesi
 session_destroy();
 
-// Redirect ke home
-header('Location: ../index.php');
-exit();
+// Arahkan ke halaman login
+header("location: login.php");
+exit;
 ?>
