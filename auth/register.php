@@ -28,7 +28,7 @@
                 </div>
             <?php endif; ?>
             
-            <form action="proses_login.php" method="POST" class="auth-form">
+            <form action="proses_register.php" method="POST" class="auth-form">
                 <div class="form-group">
                     <label for="username"><i class="fas fa-user"></i> Username</label>
                     <input type="text" id="username" name="username" required 

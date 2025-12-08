@@ -21,7 +21,7 @@ $conn = getConnection();
     <div class="container">
         <div class="search-box">
             <h2><i class="fas fa-search"></i> Cari Hotel Impian Anda</h2>
-            <form action="pages/hotels.php" method="GET" class="search-form">
+            <form action="hotels.php" method="GET" class="search-form">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="location"><i class="fas fa-map-marker-alt"></i> Lokasi</label>
