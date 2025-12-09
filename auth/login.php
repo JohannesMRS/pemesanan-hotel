@@ -1,6 +1,6 @@
 <?php
 // auth/login.php
-
+session_start();
 // Panggil file koneksi database
 include('../config/database.php'); 
 $conn = getConnection(); // 
@@ -13,7 +13,7 @@ if ($logged_in) {
     if ($is_admin) {
         header("location: ../admin/dashboard.php");
     } else {
-        header("location: ../index.php"); // Arahkan ke root folder jika user biasa
+        header("location: ../pages/home.php"); // Arahkan ke root folder jika user biasa
     }
     exit;
 }
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         if (password_verify($password, $hashed_password)) {
                             // Password benar, buat sesi baru
                             $_SESSION["loggedin"] = true;
-                            $_SESSION["id_user"] = $id_user;
+                            $_SESSION["id"] = $id_user;
                             $_SESSION["username"] = $username_or_email_db; // Simpan identitas yang digunakan untuk login
                             $_SESSION["role"] = $role;
 
@@ -103,6 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_stmt_close($stmt);
         }
     }
+    mysqli_close($conn);
 }
 
 // Sertakan Header

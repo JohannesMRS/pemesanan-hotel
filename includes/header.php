@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once __DIR__ . '/../config/database.php';
 ?>
 <!DOCTYPE html>
@@ -60,9 +61,9 @@ require_once __DIR__ . '/../config/database.php';
                                 </button>
                                 <div class="dropdown-content">
                                     <?php if (isAdmin()): ?>
-                                        <a href="admin/index.php"><i class="fas fa-cog"></i> Admin Panel</a>
+                                        <a href="../admin/dashboard.php"><i class="fas fa-cog"></i> Admin Panel</a>
                                     <?php endif; ?>
-                                    <a href="auth/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                                    <a href="../auth/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
                                 </div>
                             </div>
                         <?php else: ?>

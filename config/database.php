@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
@@ -34,15 +32,15 @@ function getConnection() {
 }
 
 // Check if user is logged in
-function isLoggedIn() {
-    return isset($_SESSION['user_id']);
+function isLoggedIn()
+{
+    return isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
 }
 
-// Check if user is admin
-function isAdmin() {
-    return isset($_SESSION['role']) && $_SESSION['role'] == 'admin';
+function isAdmin()
+{
+    return isLoggedIn() && isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 }
-
 // Redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
