@@ -50,11 +50,11 @@ function requireLogin() {
 }
 
 // Redirect if not admin
-function requireAdmin() {
-    requireLogin();
-    if (!isAdmin()) {
-        header('Location: ' . getBaseUrl() . '../pages/home.php');
-        exit();
-    }
-}
+// function requireAdmin() {
+//     requireLogin();
+//     if (!isAdmin()) {
+//         header('Location: ' . getBaseUrl() . '../pages/home.php');
+//         exit();
+//     }
+// }
 ?>
