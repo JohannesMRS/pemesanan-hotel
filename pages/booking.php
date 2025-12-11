@@ -213,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $hotel) {
                 </div>
 
                 <div class="form-group">
-                    <label for="guests">Jumlah Tamu:</label>
+                    <label for="guests">Jumlah Kamar:</label>
                     <input type="number" id="guests" name="guests" min="1" max="10"
                         value="<?php echo htmlspecialchars($guests); ?>" required>
                 </div>

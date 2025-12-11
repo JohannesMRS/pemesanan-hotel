@@ -47,25 +47,25 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
             [
                 'label' => 'Dashboard',
                 'icon' => 'fas fa-tachometer-alt',
-                'url' => 'dashboard.php',
+                'url' => '../dashboard.php',
                 'active' => ($current_file == 'dashboard.php')
             ],
             [
                 'label' => 'Kelola Pengguna',
                 'icon' => 'fas fa-users',
-                'url' => 'user/index.php',
+                'url' => '../user/index.php',
                 'active' => ($current_dir == 'user')
             ],
             [
                 'label' => 'Kelola Hotel',
                 'icon' => 'fas fa-hotel',
                 'url' => 'hotels/index.php',
-                'active' => ($current_dir == 'hotels')
+                'active' => (($current_dir == 'hotels'))
             ],
             [
                 'label' => 'Kelola Pesanan',
                 'icon' => 'fas fa-list-alt',
-                'url' => 'bookings/index.php',
+                'url' => '../bookings/index.php',
                 'active' => ($current_dir == 'bookings')
             ],
         ];
@@ -91,7 +91,7 @@ $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
         <!-- Logout -->
         <li class="sidebar-item" style="position: absolute; bottom: 0; width: 100%;">
-            <a href="../auth/logout.php"
+            <a href="../../auth/logout.php"
                 class="sidebar-link d-flex align-items-center"
                 style="padding: 15px 20px; background: #c0392b; color: white !important; text-decoration: none; border-top: 1px solid rgba(255,255,255,0.1);"
                 onclick="return confirm('Yakin ingin keluar?')">

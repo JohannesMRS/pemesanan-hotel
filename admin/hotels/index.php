@@ -9,9 +9,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. Sertakan koneksi database
 require_once('../../config/database.php');
-
 // Cek login
 if (!isLoggedIn()) {
     header('Location: ../../auth/login.php');
@@ -20,13 +18,13 @@ if (!isLoggedIn()) {
 
 // 2. Sertakan header dan sidebar
 require_once('../includes/headerAdmin.php');
-require_once('../includes/sidebarAdmin.php');
+require_once('sidebarAdmin.php');
 
 // 3. Buat koneksi
 $conn = getConnection();
 
-// 4. Query data hotel
-$sql = "SELECT id, name, location, price_per_night, is_recommended FROM hotels ORDER BY id DESC";
+// 4. Query data hotel: TAMBAHKAN KOLOM DESCRIPTION, AMENITIES, IMAGE_URL
+$sql = "SELECT id, name, description, location, price_per_night, amenities, image_url, is_recommended FROM hotels ORDER BY id DESC";
 $result = $conn->query($sql);
 
 if (!$result) {
@@ -44,13 +42,12 @@ $total_hotels = $result->num_rows;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Hotel - Admin Panel</title>
 
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* ... CSS yang sudah ada ... */
         :root {
             --sidebar-width: 250px;
             --primary-color: #2c3e50;
@@ -168,19 +165,34 @@ $total_hotels = $result->num_rows;
                 display: flex;
             }
         }
+
+        /* CSS tambahan untuk tampilan gambar di tabel */
+        .img-preview {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-right: 5px;
+        }
+
+        .description-truncate {
+            max-width: 250px;
+            /* Lebar maksimum untuk deskripsi */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     </style>
 </head>
 
 <body>
 
-    <!-- Mobile Toggle Button -->
     <button class="mobile-toggle" id="sidebarToggle">
         <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Main Content -->
     <div class="main-content" id="mainContent">
-        <!-- Page Header -->
         <div class="page-header">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -193,7 +205,6 @@ $total_hotels = $result->num_rows;
             </div>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="row mb-4">
             <div class="col-md-3">
                 <div class="card card-custom text-white bg-primary">
@@ -210,7 +221,18 @@ $total_hotels = $result->num_rows;
             </div>
         </div>
 
-        <!-- Hotel Table -->
+        <?php if (isset($_SESSION['message'])): ?>
+            <div class="alert alert-<?php echo $_SESSION['message_type']; ?> alert-dismissible fade show" role="alert">
+                <?php echo $_SESSION['message']; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php
+            // Hapus pesan setelah ditampilkan
+            unset($_SESSION['message']);
+            unset($_SESSION['message_type']);
+            ?>
+        <?php endif; ?>
+
         <div class="card card-custom">
             <div class="card-body">
                 <?php if ($total_hotels > 0): ?>
@@ -219,8 +241,10 @@ $total_hotels = $result->num_rows;
                             <thead>
                                 <tr>
                                     <th width="50">#</th>
-                                    <th>Nama Hotel</th>
+                                    <th>Gambar</th>
+                                    <th>Nama & Deskripsi</th>
                                     <th>Lokasi</th>
+                                    <th>Fasilitas</th>
                                     <th width="150">Harga/Malam</th>
                                     <th width="150">Status</th>
                                     <th width="180" class="text-center">Aksi</th>
@@ -229,20 +253,48 @@ $total_hotels = $result->num_rows;
                             <tbody>
                                 <?php
                                 $counter = 1;
+                                // Tentukan base URL untuk folder uploads (sesuaikan jika perlu)
+                                $upload_base_url = '../../img/';
                                 while ($row = $result->fetch_assoc()):
                                     $price = number_format($row['price_per_night'], 0, ',', '.');
                                     $is_recommended = $row['is_recommended'] == 1;
+
+                                    // Tentukan sumber gambar
+                                    $image_source = !empty($row['image_url']) ? $upload_base_url . htmlspecialchars($row['image_url']) : 'uploads/silimalombu.jpg';
+
+                                    // Fungsi truncate untuk deskripsi
+                                    $description_text = htmlspecialchars($row['description']);
+                                    $short_description = (strlen($description_text) > 50) ? substr($description_text, 0, 50) . '...' : $description_text;
+
                                 ?>
                                     <tr>
                                         <td class="fw-bold"><?php echo $counter++; ?></td>
+
+                                        <td>
+                                            <?php if (!empty($row['image_url'])): ?>
+                                                <img src="<?php echo $image_source; ?>" class="img-preview" alt="Gambar Hotel">
+                                            <?php else: ?>
+                                                <i class="fas fa-image text-muted fa-2x"></i>
+                                            <?php endif; ?>
+                                        </td>
+
                                         <td>
                                             <div class="fw-semibold"><?php echo htmlspecialchars($row['name']); ?></div>
-                                            <small class="text-muted">ID: <?php echo $row['id']; ?></small>
+                                            <small class="text-muted description-truncate" title="<?php echo $description_text; ?>">
+                                                <?php echo $short_description ?: 'No description provided.'; ?>
+                                            </small>
                                         </td>
+
                                         <td><?php echo htmlspecialchars($row['location']); ?></td>
+
+                                        <td>
+                                            <small class="text-info"><?php echo (strlen($row['amenities']) > 30) ? substr($row['amenities'], 0, 30) . '...' : htmlspecialchars($row['amenities'] ?: '-'); ?></small>
+                                        </td>
+
                                         <td>
                                             <span class="price-tag">Rp <?php echo $price; ?></span>
                                         </td>
+
                                         <td>
                                             <?php if ($is_recommended): ?>
                                                 <span class="badge-recommended">
@@ -254,6 +306,7 @@ $total_hotels = $result->num_rows;
                                                 </span>
                                             <?php endif; ?>
                                         </td>
+
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
                                                 <a href="edit.php?id=<?php echo $row['id']; ?>"
@@ -275,7 +328,6 @@ $total_hotels = $result->num_rows;
                         </table>
                     </div>
 
-                    <!-- Pagination Info -->
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <div class="text-muted">
                             Menampilkan <?php echo $total_hotels; ?> hotel
@@ -283,7 +335,6 @@ $total_hotels = $result->num_rows;
                     </div>
 
                 <?php else: ?>
-                    <!-- Empty State -->
                     <div class="text-center py-5">
                         <i class="fas fa-hotel fa-4x text-muted mb-3"></i>
                         <h4 class="text-muted mb-3">Belum Ada Data Hotel</h4>
@@ -296,7 +347,6 @@ $total_hotels = $result->num_rows;
             </div>
         </div>
 
-        <!-- Footer Note -->
         <div class="mt-4 text-center text-muted">
             <small>
                 <i class="fas fa-info-circle me-1"></i>
@@ -306,7 +356,6 @@ $total_hotels = $result->num_rows;
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -315,18 +364,32 @@ $total_hotels = $result->num_rows;
             const mainContent = document.getElementById('mainContent');
             const sidebar = document.querySelector('.sidebar');
 
-            if (mainContent.style.marginLeft === '0px' || mainContent.style.marginLeft === '') {
-                mainContent.style.marginLeft = '250px';
-                sidebar.style.left = '0';
-                this.innerHTML = '<i class="fas fa-times"></i>';
+            // Asumsi sidebarAdmin.php meng-*include* elemen dengan class .sidebar
+            const sidebarElement = document.querySelector('.sidebar');
+
+            if (window.getComputedStyle(sidebarElement).position === 'fixed' || window.getComputedStyle(sidebarElement).position === 'absolute') {
+                // Logic untuk mobile view (sidebar fixed/absolute)
+                if (sidebarElement.style.left === '0px' || sidebarElement.style.left === '') {
+                    sidebarElement.style.left = '-250px';
+                    mainContent.style.marginLeft = '0';
+                    this.innerHTML = '<i class="fas fa-bars"></i>';
+                } else {
+                    sidebarElement.style.left = '0';
+                    this.innerHTML = '<i class="fas fa-times"></i>';
+                }
             } else {
-                mainContent.style.marginLeft = '0';
-                sidebar.style.left = '-250px';
-                this.innerHTML = '<i class="fas fa-bars"></i>';
+                // Logic untuk desktop view (sidebar static/relative)
+                if (mainContent.style.marginLeft === '0px' || mainContent.style.marginLeft === '') {
+                    mainContent.style.marginLeft = '250px';
+                    this.innerHTML = '<i class="fas fa-times"></i>';
+                } else {
+                    mainContent.style.marginLeft = '0';
+                    this.innerHTML = '<i class="fas fa-bars"></i>';
+                }
             }
         });
 
-        // Konfirmasi delete
+        // Konfirmasi delete (Meskipun sudah ada inline, ini untuk kejelasan)
         function confirmDelete(hotelName) {
             return confirm(`Apakah Anda yakin ingin menghapus hotel "${hotelName}"?\n\nData yang sudah dihapus tidak dapat dikembalikan.`);
         }

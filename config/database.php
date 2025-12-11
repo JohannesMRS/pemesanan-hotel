@@ -49,6 +49,26 @@ function requireLogin() {
     }
 }
 
+// config/database.php
+
+// ... setelah fungsi requireLogin()
+
+// Redirect if not admin
+function requireAdmin()
+{
+    if (!isLoggedIn()) {
+        header('Location: ' . getBaseUrl() . 'auth/login.php');
+        exit();
+    }
+
+    if (!isAdmin()) {
+        header('Location: ' . getBaseUrl() . 'pages/home.php');
+        exit();
+    }
+}
+
+// ... kode lainnya
+
 
 
 // Redirect if not admin

@@ -11,4 +11,6 @@ define('HOTEL_IMAGE_PATH', 'uploads/hotel_images/');
 define('STATUS_PENDING', 'pending');
 define('STATUS_CONFIRMED', 'confirmed');
 define('STATUS_CANCELLED', 'cancelled');
+
+
 ?>

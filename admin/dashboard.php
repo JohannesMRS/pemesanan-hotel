@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Sertakan koneksi database
-require_once(__DIR__ . '/../config/database.php');
+require_once('../config/database.php');
 
 // Cek login
 if (!isLoggedIn()) {
