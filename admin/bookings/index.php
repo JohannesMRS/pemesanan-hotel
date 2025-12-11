@@ -2,7 +2,7 @@
 session_start();
 require_once __DIR__ . '/../../config/database.php';
 include '../includes/headerAdmin.php';
-require_once 'sidebarAdmin.php';    
+require_once 'sidebarAdmin.php';
 requireLogin();
 requireAdmin();
 
@@ -11,7 +11,18 @@ $page_title = "Kelola Pesanan";
 // Koneksi database
 $conn = getConnection();
 
-// Query untuk mendapatkan data bookings - DIPERBAIKI DENGAN COALESCE
+// Pagination settings
+$limit = 10; // Jumlah data per halaman
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Hitung total data
+$count_sql = "SELECT COUNT(*) as total FROM bookings";
+$count_result = $conn->query($count_sql);
+$total_rows = $count_result->fetch_assoc()['total'];
+$total_pages = ceil($total_rows / $limit);
+
+// Query untuk mendapatkan data bookings dengan pagination
 $sql = "SELECT 
             b.id_booking,
             b.id,
@@ -27,7 +38,8 @@ $sql = "SELECT
         FROM bookings b
         LEFT JOIN users u ON b.id = u.id
         LEFT JOIN hotels h ON b.hotel_id = h.id
-        ORDER BY b.booking_date DESC";
+        ORDER BY b.booking_date DESC
+        LIMIT $limit OFFSET $offset";
 
 $result = $conn->query($sql);
 
@@ -80,11 +92,28 @@ if (!$stats_result) {
                     <p class="stat-number"><?php echo $stats['pending']; ?></p>
                 </div>
             </div>
-            
+            <div class="stat-card">
+                <div class="stat-icon confirmed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Dikonfirmasi</h3>
+                    <p class="stat-number"><?php echo $stats['confirmed']; ?></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon cancelled">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Dibatalkan</h3>
+                    <p class="stat-number"><?php echo $stats['cancelled']; ?></p>
+                </div>
+            </div>
         </div>
 
         <!-- Filter Section -->
-        <!-- <div class="filter-section">
+        <div class="filter-section">
             <div class="filter-group">
                 <label for="filter-status"><i class="fas fa-filter"></i> Status Pesanan:</label>
                 <select id="filter-status" class="filter-select">
@@ -99,13 +128,13 @@ if (!$stats_result) {
                 <input type="text" id="search-pesanan" placeholder="Cari nama/hotel..." class="search-input">
             </div>
             <button class="btn-refresh" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Refresh</button>
-        </div> -->
+        </div>
 
         <!-- Orders Table -->
         <div class="table-container">
             <div class="table-header">
                 <h3><i class="fas fa-table"></i> Daftar Pesanan</h3>
-                <span class="table-count">Total: <?php echo $result->num_rows; ?> pesanan</span>
+                <span class="table-count">Total: <?php echo $total_rows; ?> pesanan (Halaman <?php echo $page; ?> dari <?php echo $total_pages; ?>)</span>
             </div>
 
             <table class="admin-table">
@@ -180,11 +209,55 @@ if (!$stats_result) {
         </div>
 
         <!-- Pagination -->
-        <div class="pagination">
-            <button class="page-btn prev" disabled><i class="fas fa-chevron-left"></i> Prev</button>
-            <span class="page-number active">1</span>
-            <button class="page-btn next">Next <i class="fas fa-chevron-right"></i></button>
-        </div>
+        <?php if ($total_pages > 1): ?>
+            <div class="pagination">
+                <!-- Tombol Previous -->
+                <?php if ($page > 1): ?>
+                    <a href="?page=<?php echo $page - 1; ?>" class="page-btn prev">
+                        <i class="fas fa-chevron-left"></i> Prev
+                    </a>
+                <?php else: ?>
+                    <span class="page-btn prev disabled">
+                        <i class="fas fa-chevron-left"></i> Prev
+                    </span>
+                <?php endif; ?>
+
+                <!-- Nomor Halaman -->
+                <?php
+                $start_page = max(1, $page - 2);
+                $end_page = min($total_pages, $page + 2);
+
+                if ($start_page > 1) {
+                    echo '<a href="?page=1" class="page-number">1</a>';
+                    if ($start_page > 2) echo '<span class="page-dots">...</span>';
+                }
+
+                for ($i = $start_page; $i <= $end_page; $i++):
+                    if ($i == $page): ?>
+                        <span class="page-number active"><?php echo $i; ?></span>
+                    <?php else: ?>
+                        <a href="?page=<?php echo $i; ?>" class="page-number"><?php echo $i; ?></a>
+                <?php endif;
+                endfor;
+
+                if ($end_page < $total_pages) {
+                    if ($end_page < $total_pages - 1) echo '<span class="page-dots">...</span>';
+                    echo '<a href="?page=' . $total_pages . '" class="page-number">' . $total_pages . '</a>';
+                }
+                ?>
+
+                <!-- Tombol Next -->
+                <?php if ($page < $total_pages): ?>
+                    <a href="?page=<?php echo $page + 1; ?>" class="page-btn next">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                <?php else: ?>
+                    <span class="page-btn next disabled">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
         <!-- Footer -->
         <footer class="admin-footer">
@@ -194,27 +267,47 @@ if (!$stats_result) {
     </main>
 </div>
 
-
-
 <!-- Modal Detail Pesanan -->
 <div id="detailModal" class="modal">
     <div class="modal-content">
-        <span class="close-modal">&times;</span>
+        <span class="close-modal" onclick="closeModal()">&times;</span>
         <h2><i class="fas fa-info-circle"></i> Detail Pesanan</h2>
         <div id="modal-body">
             <!-- Detail akan diisi via JavaScript -->
         </div>
         <div class="modal-actions">
-            <button class="btn-close-modal">Tutup</button>
+            <button class="btn-close-modal" onclick="closeModal()">Tutup</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Filter Table
-    document.getElementById('filter-status').addEventListener('change', filterTable);
-    document.getElementById('search-pesanan').addEventListener('input', filterTable);
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set data-booking-id ke setiap row
+        const rows = document.querySelectorAll('.admin-table tbody tr');
+        rows.forEach((row) => {
+            const bookingId = row.cells[0].textContent.replace('#', '');
+            row.setAttribute('data-booking-id', bookingId);
+        });
 
+        // Update waktu
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Filter section
+        const filterStatus = document.getElementById('filter-status');
+        const searchPesanan = document.getElementById('search-pesanan');
+
+        if (filterStatus) {
+            filterStatus.addEventListener('change', filterTable);
+        }
+        if (searchPesanan) {
+            searchPesanan.addEventListener('input', filterTable);
+        }
+    });
+
+    // Filter Table
     function filterTable() {
         const statusFilter = document.getElementById('filter-status').value;
         const searchQuery = document.getElementById('search-pesanan').value.toLowerCase();
@@ -238,12 +331,11 @@ if (!$stats_result) {
         });
 
         // Update count
-        document.querySelector('.table-count').textContent = `Total: ${visibleCount} pesanan`;
+        document.querySelector('.table-count').textContent = `Total: ${visibleCount} pesanan (Filtered)`;
     }
 
     // View Booking Detail
     function viewBooking(id) {
-        // Buat modal content dengan data dari row
         const btn = event.target.closest('.btn-view');
         const row = btn.closest('tr');
 
@@ -327,76 +419,59 @@ if (!$stats_result) {
             </div>
         `;
 
-        document.getElementById('detailModal').style.display = 'block';
+        openModal();
     }
 
     // Edit Booking
     function editBooking(id) {
         if (confirm(`Edit pesanan #${id.toString().padStart(4, '0')}?`)) {
-            // Redirect ke halaman edit
             window.location.href = `edit.php?id=${id}`;
         }
     }
 
     // Delete Booking
-    // Delete Booking - VERSION UPDATE
     function deleteBooking(id) {
         const bookingId = id.toString().padStart(4, '0');
 
-        // Konfirmasi dengan SweetAlert (opsional) atau alert biasa
         if (confirm(`HAPUS PESANAN #${bookingId}?\n\nApakah Anda yakin ingin menghapus pesanan ini?\nTindakan ini tidak dapat dibatalkan!`)) {
-
-            // Tampilkan loading di tombol
             const deleteBtn = event.target.closest('.btn-delete');
             const originalHTML = deleteBtn.innerHTML;
             deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             deleteBtn.disabled = true;
             deleteBtn.style.opacity = '0.7';
 
-            // Kirim data dengan FormData
             const formData = new FormData();
             formData.append('id', id);
 
-            // Kirim request ke delete.php
             fetch('delete.php', {
                     method: 'POST',
                     body: formData
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    // Reset tombol
                     deleteBtn.innerHTML = originalHTML;
                     deleteBtn.disabled = false;
                     deleteBtn.style.opacity = '1';
 
                     if (data.success) {
-                        // Tampilkan pesan sukses
                         showNotification('success', `Pesanan #${bookingId} berhasil dihapus!`);
 
-                        // Hapus baris dari tabel
                         const row = document.querySelector(`tr[data-booking-id="${bookingId}"]`);
                         if (row) {
-                            // Animasi fade out
                             row.style.backgroundColor = '#ffe6e6';
                             row.style.transition = 'all 0.5s ease';
                             row.style.opacity = '0';
                             row.style.transform = 'translateX(100px)';
 
-                            // Hapus setelah animasi
                             setTimeout(() => {
                                 row.remove();
-                                // Update counter
                                 updateTableCount();
-                                // Update stats
                                 updateStatsCard();
                             }, 500);
                         } else {
-                            // Jika tidak ada data-booking-id, reload halaman
                             setTimeout(() => location.reload(), 1000);
                         }
                     } else {
@@ -406,7 +481,6 @@ if (!$stats_result) {
                 .catch(error => {
                     console.error('Error:', error);
                     showNotification('error', 'Terjadi kesalahan saat menghapus pesanan.');
-                    // Reset tombol
                     deleteBtn.innerHTML = originalHTML;
                     deleteBtn.disabled = false;
                     deleteBtn.style.opacity = '1';
@@ -414,33 +488,29 @@ if (!$stats_result) {
         }
     }
 
-    // Fungsi notifikasi baru
+    // Fungsi notifikasi
     function showNotification(type, message) {
-        // Hapus notifikasi sebelumnya
         const existing = document.querySelector('.custom-notification');
         if (existing) existing.remove();
 
         const notification = document.createElement('div');
         notification.className = `custom-notification ${type}`;
         notification.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-        <span>${message}</span>
-        <button class="close-notification">&times;</button>
-    `;
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+            <span>${message}</span>
+            <button class="close-notification">&times;</button>
+        `;
 
         document.body.appendChild(notification);
 
-        // Tampilkan dengan animasi slide
         setTimeout(() => {
             notification.style.transform = 'translateX(0)';
         }, 10);
 
-        // Auto hide setelah 5 detik
         const autoHide = setTimeout(() => {
             hideNotification(notification);
         }, 5000);
 
-        // Tombol close
         notification.querySelector('.close-notification').addEventListener('click', () => {
             clearTimeout(autoHide);
             hideNotification(notification);
@@ -464,12 +534,11 @@ if (!$stats_result) {
             !row.classList.contains('deleted')
         ).length;
 
-        document.querySelector('.table-count').textContent = `Total: ${visibleRows} pesanan`;
+        document.querySelector('.table-count').textContent = `Total: ${visibleRows} pesanan (Filtered)`;
     }
 
-    // Update stats card (hitung ulang)
+    // Update stats card
     function updateStatsCard() {
-        // Hitung ulang stats dari tabel yang terlihat
         const rows = document.querySelectorAll('.admin-table tbody tr');
         let pending = 0,
             confirmed = 0,
@@ -487,40 +556,42 @@ if (!$stats_result) {
             }
         });
 
-        // Update angka di stat cards
-        document.querySelector('.stat-number:nth-child(1)').textContent = total;
-        document.querySelector('.stat-number:nth-child(2)').textContent = pending;
-        document.querySelector('.stat-number:nth-child(3)').textContent = confirmed;
-        document.querySelector('.stat-number:nth-child(4)').textContent = cancelled;
+        // Update stat cards
+        const statNumbers = document.querySelectorAll('.stat-number');
+        if (statNumbers.length >= 4) {
+            statNumbers[0].textContent = total;
+            statNumbers[1].textContent = pending;
+            statNumbers[2].textContent = confirmed;
+            statNumbers[3].textContent = cancelled;
+        }
     }
 
+    // Modal functions
+    function openModal() {
+        const modal = document.getElementById('detailModal');
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 
-
-    // Tambahkan di DOMContentLoaded untuk set data-booking-id
-    document.addEventListener('DOMContentLoaded', function() {
-        const rows = document.querySelectorAll('.admin-table tbody tr');
-        rows.forEach((row) => {
-            const bookingId = row.cells[0].textContent.replace('#', '');
-            row.setAttribute('data-booking-id', bookingId);
-        });
-    });
-
-    // Modal functionality
-    const modal = document.getElementById('detailModal');
-    const closeBtn = document.querySelector('.close-modal');
-    const closeBtn2 = document.querySelector('.btn-close-modal');
-
-    closeBtn.addEventListener('click', () => {
+    function closeModal() {
+        const modal = document.getElementById('detailModal');
         modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Tutup modal ketika klik di luar
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('detailModal');
+        if (event.target === modal) {
+            closeModal();
+        }
     });
 
-    closeBtn2.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
+    // Tutup dengan ESC
+    document.addEventListener('keydown', function(event) {
+        const modal = document.getElementById('detailModal');
+        if (event.key === "Escape" && modal.style.display === "block") {
+            closeModal();
         }
     });
 
@@ -534,18 +605,6 @@ if (!$stats_result) {
         });
         document.getElementById('current-time').textContent = timeString;
     }
-
-    setInterval(updateTime, 1000);
-    updateTime();
-
-    // Tambahkan data-booking-id ke setiap row
-    document.addEventListener('DOMContentLoaded', function() {
-        const rows = document.querySelectorAll('.admin-table tbody tr');
-        rows.forEach((row, index) => {
-            const bookingId = row.cells[0].textContent.replace('#', '');
-            row.setAttribute('data-booking-id', bookingId);
-        });
-    });
 </script>
 
 <style>
@@ -589,7 +648,7 @@ if (!$stats_result) {
     /* Stats Cards */
     .stats-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 20px;
         margin-bottom: 25px;
     }
@@ -908,6 +967,11 @@ if (!$stats_result) {
         margin: 30px 0;
     }
 
+    .pagination a {
+        text-decoration: none;
+        color: inherit;
+    }
+
     .page-btn,
     .page-number {
         min-width: 40px;
@@ -923,21 +987,27 @@ if (!$stats_result) {
         font-weight: 500;
     }
 
-    .page-btn:disabled {
+    .page-btn.disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
 
-    .page-btn:hover:not(:disabled),
+    .page-btn:hover:not(.disabled),
     .page-number:hover {
         background: #f8f9fa;
         border-color: #1e3c72;
+        text-decoration: none;
     }
 
     .page-number.active {
         background: #1e3c72;
         color: white;
         border-color: #1e3c72;
+    }
+
+    .page-dots {
+        padding: 0 10px;
+        color: #6c757d;
     }
 
     /* Admin Footer */
@@ -1000,6 +1070,8 @@ if (!$stats_result) {
         cursor: pointer;
         color: #6c757d;
         transition: color 0.3s;
+        background: none;
+        border: none;
     }
 
     .close-modal:hover {
@@ -1106,5 +1178,52 @@ if (!$stats_result) {
 
     .booking-detail::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
+    }
+
+    /* CSS untuk notifikasi */
+    .custom-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999;
+        transform: translateX(120%);
+        transition: transform 0.3s ease;
+        border-left: 4px solid;
+    }
+
+    .custom-notification.success {
+        border-left-color: #28a745;
+    }
+
+    .custom-notification.error {
+        border-left-color: #dc3545;
+    }
+
+    .custom-notification i {
+        font-size: 1.2rem;
+    }
+
+    .custom-notification.success i {
+        color: #28a745;
+    }
+
+    .custom-notification.error i {
+        color: #dc3545;
+    }
+
+    .close-notification {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6c757d;
+        margin-left: 10px;
     }
 </style>
