@@ -11,7 +11,7 @@ require_once(__DIR__ . '/../config/database.php');
 if (!function_exists('isLoggedIn')) {
     function isLoggedIn()
     {
-        return isset($_SESSION['user_id']);
+        return isset($_SESSION['id']);
     }
 }
 

@@ -23,7 +23,7 @@ require_once __DIR__ . '/../config/database.php';
                 <div class="logo">
                     <a href="../pages/home.php">
                         <i class="fas fa-water"></i>
-                        <span>Lake Toba Hotel Tickets</span>
+                        <span>Tiket Hotel</span>
                     </a>
                 </div>
 
